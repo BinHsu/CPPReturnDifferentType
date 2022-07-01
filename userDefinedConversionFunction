@@ -1,0 +1,63 @@
+#include <iostream>
+#include <string>
+#include <typeinfo>
+#include <any>
+
+template<typename T, typename U>
+decltype(auto) compare(const T&& t, const U&& u) {
+    std::cout << "t type:" << typeid(t).name() << std::endl;
+    std::cout << "u type:" << typeid(u).name() << std::endl;
+    return t < u ? t : u;
+}
+
+class MyInt {
+    int _int;
+public:
+    MyInt(const int input) : _int(input) {}
+    friend std::ostream& operator<<(std::ostream& os, const MyInt &src) {
+        os << src._int;
+        return os;
+    }
+    
+    operator int() const {
+        return _int;
+    }
+};
+
+class MyString {
+    std::string _string;
+public:
+    MyString(const std::string&& str) : _string(str) {}
+    friend std::ostream& operator<<(std::ostream& os, const MyString &src) {
+        os << src._string;
+        return os;
+    }
+    
+    operator int() const {
+        return std::stoi(_string);
+    }
+};
+
+int main()
+{
+    std::any any1 = compare(MyString("3"), 5);
+    std::cout << "any1 type: " << any1.type().name() << std::endl;
+    auto auto1 = compare(MyString("3"), 5);
+    std::cout << "auto1 type: " << typeid(auto1).name() << std::endl;
+    
+    std::any any2 = compare(MyString("3"), 1);
+    std::cout << "any2 type: " << any2.type().name() << std::endl;
+    auto auto2 = compare(MyString("3"), 1);
+    std::cout << "auto2 type: " << typeid(auto2).name() << std::endl;
+    
+    std::cout << compare(MyString("3"), 5) << std::endl;
+    std::cout << compare(MyString("3"), 1) << std::endl;
+    std::cout << compare(1, MyString("3")) << std::endl;
+    std::cout << compare(5, MyString("3")) << std::endl;
+    
+    std::cout << compare(MyString("3"), MyInt(5)) << std::endl;
+    std::cout << compare(MyString("3"), MyInt(1)) << std::endl;
+    std::cout << compare(MyInt(1), MyString("3")) << std::endl;
+    std::cout << compare(MyInt(5), MyString("3")) << std::endl;
+    return 0;
+}
